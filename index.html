@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Рик и Морти: Перехват Торнадо C-137</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        portal: '#00ff88',
+                        portalDark: '#00aa55',
+                        cyanGlow: '#00f3ff',
+                        spaceDark: '#050811',
+                        cardBg: 'rgba(15, 23, 42, 0.92)',
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050811;
+            color: #e2e8f0;
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .neon-text-green {
+            text-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88, 0 0 35px #00ff88;
+        }
+        .neon-text-gold {
+            text-shadow: 0 0 10px #facc15, 0 0 20px #facc15;
+        }
+        .neon-border-green {
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4), inset 0 0 10px rgba(0, 255, 136, 0.2);
+            border: 2px solid #00ff88;
+        }
+        
+        .portal-bg {
+            background: radial-gradient(circle at center, rgba(0, 255, 136, 0.18) 0%, rgba(5, 8, 17, 0.98) 75%);
+        }
+
+        @keyframes rotatePortal {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .portal-spin {
+            animation: rotatePortal 10s linear infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.95; filter: drop-shadow(0 0 12px #00ff88); }
+            50% { opacity: 0.5; filter: drop-shadow(0 0 3px #00ff88); }
+        }
+        .pulse-glow {
+            animation: pulseGlow 2.2s ease-in-out infinite;
+        }
+
+        /* Equalizer Animation */
+        @keyframes eqBar1 { 0%, 100% { height: 4px; } 50% { height: 16px; } }
+        @keyframes eqBar2 { 0%, 100% { height: 14px; } 50% { height: 6px; } }
+        @keyframes eqBar3 { 0%, 100% { height: 8px; } 50% { height: 18px; } }
+
+        .eq-bar-1 { animation: eqBar1 0.6s ease-in-out infinite; }
+        .eq-bar-2 { animation: eqBar2 0.7s ease-in-out infinite; }
+        .eq-bar-3 { animation: eqBar3 0.5s ease-in-out infinite; }
+
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050811;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen flex flex-col justify-between selection:bg-portal selection:text-black">
+
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-spaceDark/90 border-b border-portal/30">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="relative w-10 h-10 flex items-center justify-center">
+                    <i class="fa-solid fa-atom text-portal text-2xl portal-spin"></i>
+                </div>
+                <span class="font-orbitron font-extrabold text-xl sm:text-2xl tracking-wider text-white group-hover:text-portal transition">
+                    RICK & MORTY <span class="text-portal text-xs sm:text-sm block sm:inline font-normal">TORNADO C-137</span>
+                </span>
+            </a>
+
+            <nav class="hidden md:flex items-center space-x-8 font-orbitron text-sm font-semibold">
+                <a href="#game-section" class="hover:text-portal transition flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-portal"></i> ИГРА
+                </a>
+                <a href="#characters" class="hover:text-portal transition flex items-center gap-2">
+                    <i class="fa-solid fa-users text-cyanGlow"></i> ГЕРОИ
+                </a>
+                <a href="#leaderboard" class="hover:text-portal transition flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-yellow-400"></i> РЕКОРДЫ
+                </a>
+                <a href="#contact" class="hover:text-portal transition flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane text-purple-400"></i> СВЯЗЬ
+                </a>
+            </nav>
+
+            <!-- Sound & Music Controls Header -->
+            <div class="flex items-center gap-2">
+                <!-- Music BGM Button -->
+                <button id="musicToggleBtn" onclick="toggleMusic()" class="px-3 py-1.5 rounded-full border border-cyanGlow/50 bg-black/40 text-cyanGlow hover:bg-cyanGlow hover:text-black transition flex items-center gap-2 text-xs sm:text-sm font-orbitron">
+                    <div id="eqIcon" class="flex items-end gap-0.5 h-4 w-4 justify-center">
+                        <span class="w-1 bg-current rounded-full eq-bar-1"></span>
+                        <span class="w-1 bg-current rounded-full eq-bar-2"></span>
+                        <span class="w-1 bg-current rounded-full eq-bar-3"></span>
+                    </div>
+                    <span id="musicText">МУЗЫКА ON</span>
+                </button>
+
+                <!-- SFX Button -->
+                <button id="soundToggleBtn" onclick="toggleSound()" class="px-3 py-1.5 rounded-full border border-portal/50 bg-black/40 text-portal hover:bg-portal hover:text-black transition flex items-center gap-2 text-xs sm:text-sm font-orbitron">
+                    <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+                    <span id="soundText" class="hidden sm:inline">ЗВУК ON</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <section class="relative py-12 lg:py-16 portal-bg overflow-hidden border-b border-portal/20">
+        <div class="max-w-6xl mx-auto px-4 text-center relative z-10">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-portal/40 bg-portal/10 text-portal text-xs sm:text-sm font-orbitron mb-6 pulse-glow">
+                <i class="fa-solid fa-compact-disc text-cyanGlow animate-spin"></i> СИНТВЕЙВ САУНДТРЕК ИЗМЕРЕНИЯ C-137
+            </div>
+            <h1 class="font-orbitron font-black text-4xl sm:text-6xl lg:text-7xl uppercase tracking-tight text-white mb-6">
+                ПЕРЕХВАТ <span class="neon-text-green text-portal">ТОРНАДО</span>
+            </h1>
+            <p class="max-w-2xl mx-auto text-slate-300 text-base sm:text-lg mb-8 font-rajdhani">
+                Управляй космической тарелкой с Риком и Морти под ритмичный межгалактический синтвейв! Уничтожай воронки силовым лучом, собирай кристаллы времени и побей рекорд в 1000 очков.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button onclick="startGameDirectly()" class="px-8 py-4 rounded-xl bg-portal text-spaceDark font-orbitron font-bold text-lg hover:bg-white hover:shadow-[0_0_25px_#00ff88] transition transform hover:-translate-y-1 flex items-center gap-3">
+                    <i class="fa-solid fa-bolt"></i> ВЗЛЕТЕТЬ НА ТАРЕЛКЕ
+                </button>
+                <a href="#leaderboard" class="px-8 py-4 rounded-xl border-2 border-cyanGlow/60 text-cyanGlow font-orbitron font-bold text-lg hover:bg-cyanGlow/10 hover:shadow-[0_0_20px_#00f3ff] transition flex items-center gap-3">
+                    <i class="fa-solid fa-trophy text-yellow-400"></i> ПОБИТЬ 1000 ОЧКОВ
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="game-section" class="py-8 lg:py-12 px-2 sm:px-4 max-w-5xl mx-auto w-full">
+        <div class="bg-cardBg border border-portal/40 rounded-2xl p-3 sm:p-6 shadow-2xl relative overflow-hidden backdrop-blur-md">
+            
+            <!-- HUD / Scores Header -->
+            <div class="flex flex-wrap items-center justify-between gap-2 sm:gap-4 mb-4 bg-black/80 p-3 rounded-xl border border-portal/30 text-xs sm:text-base font-orbitron">
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400">СЧЁТ:</span>
+                    <span id="scoreDisplay" class="text-portal font-bold text-lg sm:text-xl">0</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400">ЦЕЛЬ РЕКОРДА:</span>
+                    <span id="highScoreDisplay" class="text-yellow-400 font-bold text-lg sm:text-xl">1000</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400">ЭНЕРГИЯ ЛУЧА:</span>
+                    <div class="w-20 sm:w-32 bg-slate-800 h-3.5 rounded-full overflow-hidden border border-slate-700">
+                        <div id="energyBar" class="bg-gradient-to-r from-portal to-cyanGlow h-full w-full transition-all duration-200"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 sm:gap-2">
+                    <span class="text-slate-400">ЖИЗНИ:</span>
+                    <div id="livesDisplay" class="flex gap-1 text-red-500 text-sm sm:text-base">
+                        <i class="fa-solid fa-heart"></i>
+                        <i class="fa-solid fa-heart"></i>
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Music Player Controller Bar above canvas -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-3 px-3 py-2 bg-black/60 rounded-lg border border-cyanGlow/20 text-xs font-orbitron">
+                <div class="flex items-center gap-2 text-cyanGlow">
+                    <i class="fa-solid fa-music text-portal animate-bounce"></i>
+                    <span>ВАЙБ-САУНДТРЕК:</span>
+                    <select id="vibeSelector" onchange="changeVibeTrack(this.value)" class="bg-slate-900 border border-cyanGlow/40 text-white rounded px-2 py-1 focus:outline-none text-xs">
+                        <option value="synthwave">Галактический Синтвейв</option>
+                        <option value="citadel">Цитадель Риков (Chiptune)</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 text-slate-300">
+                    <span>ГРОМКОСТЬ:</span>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="65" oninput="setMusicVolume(this.value)" class="w-20 sm:w-28 accent-portal cursor-pointer">
+                </div>
+            </div>
+
+            <!-- Canvas Screen -->
+            <div id="canvasWrapper" class="relative w-full aspect-[4/3] sm:aspect-[16/9] max-h-[520px] bg-black rounded-xl overflow-hidden border border-portal/30 touch-none no-select">
+                <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+                <!-- Start Screen Overlay -->
+                <div id="startOverlay" class="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-6 text-center z-20">
+                    <div class="w-20 h-20 mb-4 text-portal text-5xl flex items-center justify-center rounded-full border-2 border-portal portal-spin">
+                        <i class="fa-solid fa-hurricane"></i>
+                    </div>
+                    <h2 class="font-orbitron font-bold text-2xl sm:text-4xl text-white mb-2">МИССИЯ: ПЕРЕХВАТ ТОРНАДО</h2>
+                    <p class="text-slate-300 max-w-md text-sm sm:text-base mb-6 font-rajdhani">
+                        Управляй космической тарелкой Рика и Морти! Уничтожай <span class="text-portal font-bold">Воронки Торнадо</span> (+100 очков) силовым лучом [ПРОБЕЛ] и лови <span class="text-cyanGlow font-bold">Кристаллы Времени</span> (+50). Набери 1000+ очков под атмосферный космический бит!
+                    </p>
+                    <button onclick="startGame()" class="px-8 py-3.5 bg-portal text-black font-orbitron font-bold text-lg rounded-xl hover:shadow-[0_0_20px_#00ff88] transition">
+                        СТАРТ МИССИИ
+                    </button>
+                </div>
+
+                <!-- Dynamic Game Over / Win Overlay -->
+                <div id="gameOverOverlay" class="hidden absolute inset-0 bg-black/92 flex flex-col items-center justify-center p-6 text-center z-20">
+                    <div id="gameStatusIcon" class="text-5xl mb-3">
+                        <i class="fa-solid fa-trophy text-yellow-400"></i>
+                    </div>
+                    <h2 id="gameStatusTitle" class="font-orbitron font-bold text-2xl sm:text-4xl mb-2 text-white">
+                        МИССИЯ УСПЕШНО ЗАВЕРШЕНА!
+                    </h2>
+                    <p id="gameStatusSub" class="text-yellow-400 font-orbitron font-bold text-sm sm:text-base mb-4 uppercase tracking-widest">
+                        РЕКОРД МУЛЬТИВСЕЛЕННОЙ ПРЕВЫШЕН!
+                    </p>
+                    <p id="rickQuote" class="text-cyanGlow font-orbitron italic text-base sm:text-lg mb-6 max-w-lg leading-relaxed">
+                        "WUBBA LUBBA DUB DUB! Ты побил рекорд самого Рика Санчеза из Измерения C-137! Ты настоящий гений мультивселенной!"
+                    </p>
+                    <p class="text-slate-300 mb-6 text-sm sm:text-base font-orbitron">
+                        Финальный счёт: <span id="finalScore" class="text-portal font-bold text-3xl">0</span>
+                    </p>
+                    <button onclick="startGame()" class="px-8 py-3.5 bg-portal text-black font-orbitron font-bold text-lg rounded-xl hover:shadow-[0_0_20px_#00ff88] transition">
+                        СЫГРАТЬ ЕЩЁ РАЗ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Controls Buttons -->
+            <div class="mt-4 grid grid-cols-3 gap-2 md:hidden no-select">
+                <button id="btnLeft" class="bg-slate-800/80 border border-portal/40 text-portal py-4 rounded-xl text-2xl active:bg-portal active:text-black flex items-center justify-center">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button id="btnBeam" class="bg-cyanGlow/20 border border-cyanGlow text-cyanGlow py-4 rounded-xl text-xs font-orbitron font-bold active:bg-cyanGlow active:text-black flex flex-col items-center justify-center">
+                    <i class="fa-solid fa-shield-halved text-lg mb-1"></i>
+                    СИЛОВОЙ ЛУЧ
+                </button>
+                <button id="btnRight" class="bg-slate-800/80 border border-portal/40 text-portal py-4 rounded-xl text-2xl active:bg-portal active:text-black flex items-center justify-center">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <div class="hidden md:flex justify-between items-center mt-4 text-xs text-slate-400 font-orbitron px-2">
+                <span><i class="fa-solid fa-keyboard text-portal"></i> Управление: A/D или Стрелки — Влево/Вправо</span>
+                <span>Пробел — Активировать Силовой Луч</span>
+                <span>Тач / Сенсор — Перетаскивание пальцем по экрану</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="leaderboard" class="py-12 max-w-5xl mx-auto px-4">
+        <div class="text-center mb-8">
+            <h2 class="font-orbitron font-bold text-3xl sm:text-4xl text-white mb-2">
+                ТАБЛИЦА <span class="text-yellow-400">ЛИДЕРОВ</span>
+            </h2>
+            <p class="text-slate-400 text-sm">Побей рекорд Рика C-137 в 1000 очков и стань Новым Повелителем Торнадо!</p>
+        </div>
+
+        <div class="bg-cardBg border border-portal/30 rounded-2xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left font-orbitron text-sm">
+                    <thead class="bg-black/80 text-slate-400 border-b border-portal/20">
+                        <tr>
+                            <th class="p-4">РАНГ</th>
+                            <th class="p-4">ПИЛОТ</th>
+                            <th class="p-4">ИЗМЕРЕНИЕ</th>
+                            <th class="p-4 text-right">ОЧКИ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody" class="divide-y divide-slate-800/60 text-slate-200">
+                        <!-- Populated dynamically via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="characters" class="py-12 bg-spaceDark/60 border-t border-b border-portal/20">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-10">
+                <h2 class="font-orbitron font-extrabold text-3xl sm:text-4xl text-white mb-3">
+                    ГЕРОИ <span class="text-portal">МУЛЬТИВСЕЛЕННОЙ</span>
+                </h2>
+                <p class="text-slate-400 max-w-xl mx-auto">Что говорят персонажи о перехвате Торнадо в Измерении C-137.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Rick -->
+                <div class="bg-cardBg border border-portal/40 rounded-2xl p-6 flex flex-col justify-between hover:border-portal transition duration-300">
+                    <div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-14 h-14 rounded-full border-2 border-portal bg-black flex items-center justify-center text-portal text-2xl shrink-0">
+                                <i class="fa-solid fa-flask"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-orbitron font-bold text-xl text-white">Рик Санчез</h3>
+                                <span class="text-xs text-portal font-orbitron">Рекорд: 1000 очков</span>
+                            </div>
+                        </div>
+                        <p class="text-slate-300 text-sm italic font-rajdhani text-base">
+                            «Wubba Lubba Dub Dub! Я создал эту тарелку из космического мусора, а вы даже торнадо перехватить нормально не можете!»
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Morty -->
+                <div class="bg-cardBg border border-cyanGlow/40 rounded-2xl p-6 flex flex-col justify-between hover:border-cyanGlow transition duration-300">
+                    <div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-14 h-14 rounded-full border-2 border-cyanGlow bg-black flex items-center justify-center text-cyanGlow text-2xl shrink-0">
+                                <i class="fa-solid fa-shield"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-orbitron font-bold text-xl text-white">Морти Смит</h3>
+                                <span class="text-xs text-cyanGlow font-orbitron">Рекорд: 850 очков</span>
+                            </div>
+                        </div>
+                        <p class="text-slate-300 text-sm italic font-rajdhani text-base">
+                            «Оу, чувак, Рик сказал, что если я не наберу хотя бы 800 очков, он превратит меня в огурец!»
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Evil Morty -->
+                <div class="bg-cardBg border border-purple-500/40 rounded-2xl p-6 flex flex-col justify-between hover:border-purple-500 transition duration-300">
+                    <div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-14 h-14 rounded-full border-2 border-purple-500 bg-black flex items-center justify-center text-purple-400 text-2xl shrink-0">
+                                <i class="fa-solid fa-eye-slash"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-orbitron font-bold text-xl text-white">Злой Морти</h3>
+                                <span class="text-xs text-purple-400 font-orbitron">Рекорд: 920 очков</span>
+                            </div>
+                        </div>
+                        <p class="text-slate-300 text-sm italic font-rajdhani text-base">
+                            «Все эти измерения... все эти торнадо. Скоро все они будут принадлежать мне.»
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Summer -->
+                <div class="bg-cardBg border border-pink-500/40 rounded-2xl p-6 flex flex-col justify-between hover:border-pink-500 transition duration-300">
+                    <div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-14 h-14 rounded-full border-2 border-pink-500 bg-black flex items-center justify-center text-pink-400 text-2xl shrink-0">
+                                <i class="fa-solid fa-mobile-screen"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-orbitron font-bold text-xl text-white">Саммер Смит</h3>
+                                <span class="text-xs text-pink-400 font-orbitron">Рекорд: 600 очков</span>
+                            </div>
+                        </div>
+                        <p class="text-slate-300 text-sm italic font-rajdhani text-base">
+                            «Парни, вы серьезно тратите жизнь на перехват торнадо в 2D-игре? Это же полный кринж...»
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Birdperson -->
+                <div class="bg-cardBg border border-yellow-500/40 rounded-2xl p-6 flex flex-col justify-between hover:border-yellow-500 transition duration-300 md:col-span-2 lg:col-span-2">
+                    <div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-14 h-14 rounded-full border-2 border-yellow-500 bg-black flex items-center justify-center text-yellow-400 text-2xl shrink-0">
+                                <i class="fa-solid fa-crow"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-orbitron font-bold text-xl text-white">Птичья Личность</h3>
+                                <span class="text-xs text-yellow-400 font-orbitron">Рекорд: 750 очков</span>
+                            </div>
+                        </div>
+                        <p class="text-slate-300 text-sm italic font-rajdhani text-base">
+                            «Перехват торнадо — древний и опасный обряд на моей родной планете.»
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-12 bg-spaceDark/80 border-t border-portal/20">
+        <div class="max-w-3xl mx-auto px-4">
+            <div class="bg-cardBg border border-cyanGlow/40 rounded-2xl p-6 sm:p-8 shadow-2xl relative">
+                <div class="text-center mb-6">
+                    <h2 class="font-orbitron font-bold text-2xl sm:text-3xl text-white mb-2">
+                        МЕЖПРОСТРАНСТВЕННАЯ <span class="text-cyanGlow">СВЯЗЬ</span>
+                    </h2>
+                    <p class="text-slate-400 text-sm">Отправь сигнал Рику в гараж измерения C-137</p>
+                </div>
+
+                <form id="portalForm" onsubmit="handleFormSubmit(event)" class="space-y-4 font-orbitron">
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">ПОЗЫВНОЙ ПИЛОТА</label>
+                        <input type="text" id="senderName" required placeholder="Морти" class="w-full bg-black/70 border border-portal/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-portal transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">КВАНТОВЫЙ EMAIL (ФИКСИРОВАННЫЙ ДОМЕН)</label>
+                        <div class="flex rounded-xl overflow-hidden border border-portal/30 bg-black/70 focus-within:border-portal">
+                            <input type="text" id="emailUser" required placeholder="rick_c137" class="w-full bg-transparent px-4 py-3 text-white focus:outline-none text-right sm:text-left">
+                            <span class="bg-portal/20 text-portal px-3 py-3 flex items-center text-xs sm:text-sm font-bold select-none border-l border-portal/30 shrink-0">
+                                @mortydimensionc137.com
+                            </span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1">* Домен @mortydimensionc137.com защищен протоколом измерения C-137 и не подлежит изменению</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">СООБЩЕНИЕ ДЛЯ РИКА</label>
+                        <textarea id="senderMsg" rows="3" required placeholder="Рик, мы обнаружили аномалию воронки..." class="w-full bg-black/70 border border-portal/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-portal transition"></textarea>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="w-full py-3.5 bg-cyanGlow text-black font-bold rounded-xl hover:shadow-[0_0_20px_#00f3ff] transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>ОТПРАВИТЬ СИГНАЛ В C-137</span>
+                    </button>
+                </form>
+
+                <!-- Animated Transmission Box -->
+                <div id="transmittingBox" class="hidden text-center py-8">
+                    <i class="fa-solid fa-atom text-portal text-5xl portal-spin mb-3 block"></i>
+                    <p class="font-orbitron font-bold text-white text-lg animate-pulse">ПЕРЕДАЧА СИГНАЛА ЧЕРЕЗ ПОРТАЛ...</p>
+                </div>
+
+                <!-- Rick Interactive Reply Modal -->
+                <div id="rickReplyModal" class="hidden bg-black/95 border-2 border-portal rounded-xl p-6 mt-6 shadow-[0_0_30px_rgba(0,255,136,0.35)]">
+                    <div class="flex items-center gap-3 mb-4 border-b border-portal/30 pb-3">
+                        <div class="w-12 h-12 rounded-full border border-portal bg-portal/20 flex items-center justify-center text-portal text-2xl shrink-0">
+                            <i class="fa-solid fa-flask"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-orbitron font-bold text-portal text-lg">ВХОДЯЩИЙ ОТВЕТ ОТ РИКА САНЧЕЗА</h4>
+                            <p class="text-xs text-slate-400">Измерение C-137 • Игровой клуб Blips and Chitz</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-700 p-4 rounded-xl mb-4 font-rajdhani text-slate-200 text-base sm:text-lg leading-relaxed">
+                        <p id="rickReplyText" class="italic text-cyanGlow">
+                            «Привет, смертный! Твой межпространственный сигнал пробился через роутер C-137. Я сейчас занят в Blips and Chitz, но если твое сообщение не полная чушь Морти — жди портал прямо у себя в комнате через 3.. 2.. 1.. Ладно, шучу, отпишусь, когда выберусь из этой галактики! WUBBA LUBBA DUB DUB!»
+                        </p>
+                    </div>
+                    <button onclick="resetContactForm()" class="w-full py-2.5 bg-portal text-black font-orbitron font-bold rounded-lg hover:bg-white transition">
+                        ПОНЯЛ, РИК!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-portal/20 py-6 bg-black text-center text-xs text-slate-500 font-orbitron">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p>© 2026 RICK & MORTY TORNADO CATCHER. C-137 EDITION.</p>
+            <p class="text-portal">WUBBA LUBBA DUB DUB!</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Web Audio Synthwave Music & Sound Engine ---
+        class WebAudioEngine {
+            constructor() {
+                this.ctx = null;
+                this.soundEnabled = true;
+                this.musicEnabled = true;
+                this.musicVolume = 0.65;
+                this.currentVibe = 'synthwave';
+                this.isPlayingBGM = false;
+                this.bgmTimer = null;
+                this.step = 0;
+
+                // Musical scales
+                this.scales = {
+                    synthwave: [130.81, 146.83, 155.56, 174.61, 196.00, 220.00, 233.08, 261.63], // C minor scale
+                    citadel: [146.83, 164.81, 174.61, 196.00, 220.00, 246.94, 261.63, 293.66]     // D minor scale
+                };
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            // --- Sound Effects ---
+            playLaser() {
+                if (!this.soundEnabled || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(900, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+
+            playPickup() {
+                if (!this.soundEnabled || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(500, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1400, this.ctx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.12);
+            }
+
+            playExplosion() {
+                if (!this.soundEnabled || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+
+            playWin() {
+                if (!this.soundEnabled || !this.ctx) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.1);
+                    gain.gain.setValueAtTime(0.25, this.ctx.currentTime + idx * 0.1);
+                    gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.1 + 0.2);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + idx * 0.1);
+                    osc.stop(this.ctx.currentTime + idx * 0.1 + 0.2);
+                });
+            }
+
+            playPortal() {
+                if (!this.soundEnabled || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.4);
+            }
+
+            // --- Realtime Synthwave Music Generator ---
+            startBGM() {
+                this.init();
+                if (this.isPlayingBGM || !this.musicEnabled) return;
+                this.isPlayingBGM = true;
+                this.step = 0;
+                
+                const tempo = this.currentVibe === 'synthwave' ? 128 : 140;
+                const interval = (60 / tempo / 4) * 1000;
+
+                this.bgmTimer = setInterval(() => {
+                    this.playMusicStep();
+                }, interval);
+            }
+
+            stopBGM() {
+                if (this.bgmTimer) {
+                    clearInterval(this.bgmTimer);
+                    this.bgmTimer = null;
+                }
+                this.isPlayingBGM = false;
+            }
+
+            playMusicStep() {
+                if (!this.musicEnabled || !this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const scale = this.scales[this.currentVibe] || this.scales.synthwave;
+                const vol = this.musicVolume * 0.22;
+
+                // 1. Kick Drum on beats 0, 4, 8, 12
+                if (this.step % 4 === 0) {
+                    const kickOsc = this.ctx.createOscillator();
+                    const kickGain = this.ctx.createGain();
+                    kickOsc.type = 'sine';
+                    kickOsc.frequency.setValueAtTime(120, now);
+                    kickOsc.frequency.exponentialRampToValueAtTime(35, now + 0.12);
+                    kickGain.gain.setValueAtTime(vol * 1.8, now);
+                    kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                    kickOsc.connect(kickGain);
+                    kickGain.connect(this.ctx.destination);
+                    kickOsc.start(now);
+                    kickOsc.stop(now + 0.12);
+                }
+
+                // 2. Snare / Noise Clap on beats 4, 12
+                if (this.step % 8 === 4) {
+                    const snareOsc = this.ctx.createOscillator();
+                    const snareGain = this.ctx.createGain();
+                    snareOsc.type = 'triangle';
+                    snareOsc.frequency.setValueAtTime(220, now);
+                    snareOsc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
+                    snareGain.gain.setValueAtTime(vol * 1.1, now);
+                    snareGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                    snareOsc.connect(snareGain);
+                    snareGain.connect(this.ctx.destination);
+                    snareOsc.start(now);
+                    snareOsc.stop(now + 0.15);
+                }
+
+                // 3. Synthwave Bass Arpeggio (driving 16th notes)
+                const bassNotes = [scale[0]/2, scale[0]/2, scale[2]/2, scale[0]/2, scale[3]/2, scale[0]/2, scale[4]/2, scale[2]/2];
+                const bassFreq = bassNotes[this.step % bassNotes.length];
+
+                const bassOsc = this.ctx.createOscillator();
+                const bassFilter = this.ctx.createBiquadFilter();
+                const bassGain = this.ctx.createGain();
+
+                bassOsc.type = 'sawtooth';
+                bassOsc.frequency.setValueAtTime(bassFreq, now);
+
+                bassFilter.type = 'lowpass';
+                bassFilter.frequency.setValueAtTime(400 + Math.sin(this.step * 0.2) * 250, now);
+
+                bassGain.gain.setValueAtTime(vol * 0.9, now);
+                bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+                bassOsc.connect(bassFilter);
+                bassFilter.connect(bassGain);
+                bassGain.connect(this.ctx.destination);
+                bassOsc.start(now);
+                bassOsc.stop(now + 0.1);
+
+                // 4. Cosmic Lead Synth Melody
+                if (this.step % 2 === 0) {
+                    const melodyPattern = [
+                        scale[4], scale[5], scale[7], scale[5],
+                        scale[3], scale[4], scale[2], scale[0]
+                    ];
+                    const leadFreq = melodyPattern[(Math.floor(this.step / 2)) % melodyPattern.length];
+
+                    const leadOsc = this.ctx.createOscillator();
+                    const leadGain = this.ctx.createGain();
+                    leadOsc.type = this.currentVibe === 'synthwave' ? 'sawtooth' : 'square';
+                    leadOsc.frequency.setValueAtTime(leadFreq * 2, now);
+
+                    leadGain.gain.setValueAtTime(vol * 0.5, now);
+                    leadGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+                    leadOsc.connect(leadGain);
+                    leadGain.connect(this.ctx.destination);
+                    leadOsc.start(now);
+                    leadOsc.stop(now + 0.18);
+                }
+
+                this.step = (this.step + 1) % 16;
+            }
+        }
+
+        const audioEngine = new WebAudioEngine();
+
+        function toggleSound() {
+            audioEngine.init();
+            audioEngine.soundEnabled = !audioEngine.soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (audioEngine.soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                text.textContent = 'ЗВУК ON';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                text.textContent = 'ЗВУК OFF';
+            }
+        }
+
+        function toggleMusic() {
+            audioEngine.init();
+            audioEngine.musicEnabled = !audioEngine.musicEnabled;
+            const eqIcon = document.getElementById('eqIcon');
+            const text = document.getElementById('musicText');
+
+            if (audioEngine.musicEnabled) {
+                eqIcon.style.display = 'flex';
+                text.textContent = 'МУЗЫКА ON';
+                audioEngine.startBGM();
+            } else {
+                eqIcon.style.display = 'none';
+                text.textContent = 'МУЗЫКА OFF';
+                audioEngine.stopBGM();
+            }
+        }
+
+        function changeVibeTrack(vibe) {
+            audioEngine.currentVibe = vibe;
+            if (audioEngine.musicEnabled) {
+                audioEngine.stopBGM();
+                audioEngine.startBGM();
+            }
+        }
+
+        function setMusicVolume(val) {
+            audioEngine.musicVolume = val / 100;
+        }
+
+        // Auto-start music on first interaction
+        window.addEventListener('click', () => {
+            audioEngine.init();
+            if (audioEngine.musicEnabled && !audioEngine.isPlayingBGM) {
+                audioEngine.startBGM();
+            }
+        }, { once: true });
+
+        // --- STREAMING_CHUNK:Managing Leaderboard Data and LocalStorage... ---
+        const DEFAULT_LEADERBOARD = [
+            { rank: 1, name: 'Rick_C137', dimension: 'C-137', score: 1000, tag: 'Гений Гаража' },
+            { rank: 2, name: 'Evil_Morty', dimension: 'J-19-Z7', score: 920, tag: 'Верховный Морти' },
+            { rank: 3, name: 'Morty_Smith', dimension: 'C-137', score: 850, tag: 'Штурман' },
+            { rank: 4, name: 'Birdperson', dimension: 'Мир Птиц', score: 750, tag: 'Воин' },
+            { rank: 5, name: 'Summer_Smith', dimension: 'C-137', score: 600, tag: 'Кринж' }
+        ];
+
+        function getLeaderboard() {
+            const saved = localStorage.getItem('rm_tornado_leaderboard_v4');
+            if (saved) {
+                try { return JSON.parse(saved); } catch(e){}
+            }
+            return DEFAULT_LEADERBOARD;
+        }
+
+        function renderLeaderboard() {
+            const list = getLeaderboard();
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '';
+
+            list.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-portal/5 transition " + (item.isUser ? "bg-portal/15 border-l-4 border-portal" : "");
+                
+                let rankIcon = `#${index + 1}`;
+                if (index === 0) rankIcon = `<i class="fa-solid fa-crown text-yellow-400 text-base"></i> #1`;
+
+                tr.innerHTML = `
+                    <td class="p-4 font-bold ${index === 0 ? 'text-yellow-400' : 'text-slate-300'}">${rankIcon}</td>
+                    <td class="p-4 font-bold text-white flex items-center gap-2">
+                        ${item.name}
+                        <span class="text-[10px] ${index === 0 ? 'bg-yellow-400 text-black' : 'bg-portal/20 text-portal'} px-2 py-0.5 rounded-full font-bold">
+                            ${item.tag || 'Пилот'}
+                        </span>
+                    </td>
+                    <td class="p-4 text-cyanGlow">${item.dimension}</td>
+                    <td class="p-4 text-right font-bold text-portal text-base">${item.score.toLocaleString()}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateLeaderboardWithUser(userScore) {
+            let list = getLeaderboard();
+            const userName = prompt('ВЫ ПОБИЛИ РЕКОРД РИКА! Введите ваш позывной пилота:', 'Морти_C137') || 'Повелитель_Торнадо';
+            
+            list.push({
+                rank: 0,
+                name: userName,
+                dimension: 'C-137',
+                score: userScore,
+                tag: 'Новый Повелитель Торнадо',
+                isUser: true
+            });
+
+            // Sort descending by score
+            list.sort((a, b) => b.score - a.score);
+            list = list.slice(0, 5); // keep top 5
+
+            localStorage.setItem('rm_tornado_leaderboard_v4', JSON.stringify(list));
+            renderLeaderboard();
+        }
+
+        renderLeaderboard();
+
+        // --- STREAMING_CHUNK:Loading Spaceship Canvas Graphics and Main Game Loop... ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let isPlaying = false;
+        let score = 0;
+        let lives = 3;
+        let energy = 100;
+        let animFrameId = null;
+
+        const ship = {
+            x: 0,
+            y: 0,
+            width: 86,
+            height: 56,
+            speed: 8.5,
+            beamActive: false,
+            beamTimer: 0
+        };
+
+        // Self-contained SVG image of Flying Saucer with Rick and Morty
+        const shipSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" width="120" height="80">
+            <ellipse cx="60" cy="72" rx="20" ry="6" fill="rgba(0, 255, 136, 0.7)"/>
+            <ellipse cx="60" cy="70" rx="12" ry="4" fill="#00ff88"/>
+
+            <path d="M 32 40 C 32 15, 88 15, 88 40 Z" fill="rgba(0, 243, 255, 0.4)" stroke="#00f3ff" stroke-width="2"/>
+            <path d="M 40 22 Q 48 18 52 28" stroke="rgba(255,255,255,0.8)" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+            <!-- Rick -->
+            <polygon points="42,16 45,10 48,15 52,9 55,15 59,11 60,18" fill="#a5f3fc"/>
+            <circle cx="50" cy="22" r="5" fill="#fbebba"/>
+            <circle cx="48" cy="21" r="1.2" fill="#000"/>
+            <circle cx="52" cy="21" r="1.2" fill="#000"/>
+            <path d="M 46 18 Q 50 17 54 18" stroke="#0284c7" stroke-width="1.2" fill="none"/>
+            <path d="M 50 25 Q 51 27 50 28" stroke="#00ff88" stroke-width="1.5" fill="none"/>
+            <path d="M 43 27 L 57 27 L 59 38 L 41 38 Z" fill="#ffffff"/>
+
+            <!-- Morty -->
+            <circle cx="70" cy="25" r="4.5" fill="#b45309"/>
+            <circle cx="70" cy="26" r="4" fill="#fbebba"/>
+            <circle cx="68" cy="25" r="1" fill="#000"/>
+            <circle cx="72" cy="25" r="1" fill="#000"/>
+            <path d="M 68 29 Q 70 31 72 29" stroke="#b45309" stroke-width="1" fill="none"/>
+            <path d="M 63 30 L 77 30 L 78 38 L 62 38 Z" fill="#facc15"/>
+
+            <rect x="42" y="32" width="36" height="8" rx="2" fill="#334155" stroke="#00ff88" stroke-width="1"/>
+            <circle cx="50" cy="34" r="2" fill="#ef4444"/>
+            <circle cx="70" cy="34" r="2" fill="#00ff88"/>
+
+            <ellipse cx="60" cy="46" rx="55" ry="14" fill="#475569" stroke="#00ff88" stroke-width="2.5"/>
+            <ellipse cx="60" cy="48" rx="48" ry="9" fill="#334155"/>
+
+            <circle cx="22" cy="48" r="3.5" fill="#00ff88"/>
+            <circle cx="41" cy="51" r="3.5" fill="#00f3ff"/>
+            <circle cx="60" cy="52" r="4" fill="#00ff88"/>
+            <circle cx="79" cy="51" r="3.5" fill="#00f3ff"/>
+            <circle cx="98" cy="48" r="3.5" fill="#00ff88"/>
+
+            <ellipse cx="40" cy="58" rx="5" ry="2.5" fill="#00ff88"/>
+            <ellipse cx="80" cy="58" rx="5" ry="2.5" fill="#00ff88"/>
+        </svg>`;
+
+        const shipImg = new Image();
+        shipImg.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(shipSVG);
+
+        let tornadoes = [];
+        let crystals = [];
+        let asteroids = [];
+        let particles = [];
+
+        const keys = { left: false, right: false };
+
+        const failureQuotes = [
+            '"Wubba Lubba Dub Dub! Ты слился, Морти!"',
+            '"1000 очков тебе не по зубам, парень!"',
+            '"Мы отправляемся в измерение, где ты умеешь рулить!"',
+            '"Торнадо засосало наш аккумулятор!"'
+        ];
+
+        function resizeCanvas() {
+            const wrapper = document.getElementById('canvasWrapper');
+            canvas.width = wrapper.clientWidth;
+            canvas.height = wrapper.clientHeight;
+            if (!isPlaying) {
+                ship.x = canvas.width / 2;
+                ship.y = canvas.height - 60;
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+            if (e.code === 'Space') activateBeam();
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+        });
+
+        const btnLeft = document.getElementById('btnLeft');
+        const btnRight = document.getElementById('btnRight');
+        const btnBeam = document.getElementById('btnBeam');
+
+        btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); keys.left = true; });
+        btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); keys.left = false; });
+        btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); keys.right = true; });
+        btnRight.addEventListener('touchend', (e) => { e.preventDefault(); keys.right = false; });
+        btnBeam.addEventListener('touchstart', (e) => { e.preventDefault(); activateBeam(); });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!isPlaying) return;
+            const rect = canvas.getBoundingClientRect();
+            const touchX = e.touches[0].clientX - rect.left;
+            ship.x = Math.max(ship.width / 2, Math.min(canvas.width - ship.width / 2, touchX));
+        });
+
+        function activateBeam() {
+            audioEngine.init();
+            if (energy >= 20 && !ship.beamActive) {
+                ship.beamActive = true;
+                ship.beamTimer = 25;
+                energy = Math.max(0, energy - 25);
+                audioEngine.playLaser();
+            }
+        }
+
+        function startGameDirectly() {
+            document.getElementById('game-section').scrollIntoView({ behavior: 'smooth' });
+            if (!isPlaying) startGame();
+        }
+
+        function startGame() {
+            audioEngine.init();
+            audioEngine.playPortal();
+            if (audioEngine.musicEnabled && !audioEngine.isPlayingBGM) {
+                audioEngine.startBGM();
+            }
+
+            resizeCanvas();
+            isPlaying = true;
+            score = 0;
+            lives = 3;
+            energy = 100;
+            tornadoes = [];
+            crystals = [];
+            asteroids = [];
+            particles = [];
+            ship.x = canvas.width / 2;
+            ship.y = canvas.height - 60;
+
+            document.getElementById('startOverlay').classList.add('hidden');
+            document.getElementById('gameOverOverlay').classList.add('hidden');
+            updateHUD();
+
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            gameLoop();
+        }
+
+        function spawnEntities() {
+            if (Math.random() < 0.028) {
+                tornadoes.push({
+                    x: Math.random() * (canvas.width - 60) + 30,
+                    y: -40,
+                    radius: 22 + Math.random() * 12,
+                    speed: 2 + Math.random() * 2.2,
+                    angle: 0
+                });
+            }
+
+            if (Math.random() < 0.035) {
+                crystals.push({
+                    x: Math.random() * (canvas.width - 40) + 20,
+                    y: -30,
+                    size: 16,
+                    speed: 2.5 + Math.random() * 2
+                });
+            }
+
+            if (Math.random() < 0.022) {
+                asteroids.push({
+                    x: Math.random() * (canvas.width - 40) + 20,
+                    y: -30,
+                    size: 16 + Math.random() * 12,
+                    speed: 3 + Math.random() * 2.5
+                });
+            }
+        }
+
+        function createParticles(x, y, color, count = 12) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 7,
+                    vy: (Math.random() - 0.5) * 7,
+                    radius: Math.random() * 3.5 + 1,
+                    color: color,
+                    alpha: 1
+                });
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('energyBar').style.width = energy + '%';
+            
+            const livesContainer = document.getElementById('livesDisplay');
+            livesContainer.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const heart = document.createElement('i');
+                heart.className = i < lives ? 'fa-solid fa-heart' : 'fa-regular fa-heart text-slate-700';
+                livesContainer.appendChild(heart);
+            }
+        }
+
+        function gameOver() {
+            isPlaying = false;
+            const statusIcon = document.getElementById('gameStatusIcon');
+            const statusTitle = document.getElementById('gameStatusTitle');
+            const statusSub = document.getElementById('gameStatusSub');
+            const quoteEl = document.getElementById('rickQuote');
+
+            if (score >= 1000) {
+                audioEngine.playWin();
+                statusIcon.innerHTML = `<i class="fa-solid fa-trophy text-yellow-400 text-6xl pulse-glow"></i>`;
+                statusTitle.textContent = "МИССИЯ УСПЕШНО ЗАВЕРШЕНА!";
+                statusTitle.className = "font-orbitron font-bold text-2xl sm:text-4xl mb-2 text-portal neon-text-green";
+                statusSub.textContent = "РЕКОРД МУЛЬТИВСЕЛЕННОЙ ПРЕВЫШЕН!";
+                statusSub.className = "text-yellow-400 font-orbitron font-bold text-sm sm:text-base mb-4 uppercase tracking-widest neon-text-gold";
+                quoteEl.textContent = "«WUBBA LUBBA DUB DUB! Ты побил рекорд самого Рика Санчеза из Измерения C-137! Ты настоящий гений мультивселенной!»";
+
+                setTimeout(() => {
+                    updateLeaderboardWithUser(score);
+                }, 400);
+            } else {
+                audioEngine.playExplosion();
+                statusIcon.innerHTML = `<i class="fa-solid fa-skull-crossbones text-red-500 text-5xl"></i>`;
+                statusTitle.textContent = "МИССИЯ ПРОВАЛЕНА";
+                statusTitle.className = "font-orbitron font-bold text-2xl sm:text-4xl mb-2 text-red-500";
+                statusSub.textContent = "НЕ ХВАТИЛО ДО 1000 ОЧКОВ";
+                statusSub.className = "text-slate-400 font-orbitron text-xs sm:text-sm mb-4 uppercase tracking-widest";
+                quoteEl.textContent = failureQuotes[Math.floor(Math.random() * failureQuotes.length)];
+            }
+
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOverOverlay').classList.remove('hidden');
+        }
+
+        function gameLoop() {
+            if (!isPlaying) return;
+
+            ctx.fillStyle = 'rgba(5, 8, 17, 0.38)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (energy < 100) energy += 0.22;
+            updateHUD();
+
+            if (keys.left) ship.x -= ship.speed;
+            if (keys.right) ship.x += ship.speed;
+            ship.x = Math.max(ship.width / 2, Math.min(canvas.width - ship.width / 2, ship.x));
+
+            spawnEntities();
+
+            // Beam Laser
+            if (ship.beamActive) {
+                ship.beamTimer--;
+                if (ship.beamTimer <= 0) ship.beamActive = false;
+
+                ctx.save();
+                ctx.fillStyle = 'rgba(0, 243, 255, 0.4)';
+                ctx.shadowColor = '#00f3ff';
+                ctx.shadowBlur = 18;
+                ctx.beginPath();
+                ctx.moveTo(ship.x - 18, ship.y - 10);
+                ctx.lineTo(ship.x + 18, ship.y - 10);
+                ctx.lineTo(ship.x + 40, 0);
+                ctx.lineTo(ship.x - 40, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Draw Spaceship Sprite (Rick & Morty Saucer)
+            ctx.drawImage(shipImg, ship.x - ship.width / 2, ship.y - ship.height / 2, ship.width, ship.height);
+
+            // Tornadoes
+            for (let i = tornadoes.length - 1; i >= 0; i--) {
+                const t = tornadoes[i];
+                t.y += t.speed;
+                t.angle += 0.15;
+
+                ctx.save();
+                ctx.translate(t.x, t.y);
+                ctx.rotate(t.angle);
+                ctx.strokeStyle = '#00ff88';
+                ctx.lineWidth = 3;
+                ctx.shadowColor = '#00ff88';
+                ctx.shadowBlur = 10;
+
+                ctx.beginPath();
+                ctx.arc(0, 0, t.radius, 0, Math.PI * 1.5);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(0, 0, t.radius * 0.5, 0, Math.PI);
+                ctx.stroke();
+                ctx.restore();
+
+                // Beam Hit
+                if (ship.beamActive && Math.abs(t.x - ship.x) < (t.radius + 35) && t.y < ship.y) {
+                    createParticles(t.x, t.y, '#00ff88', 15);
+                    tornadoes.splice(i, 1);
+                    score += 100;
+                    audioEngine.playPickup();
+                    continue;
+                }
+
+                // Ship Collision
+                const dist = Math.hypot(t.x - ship.x, t.y - ship.y);
+                if (dist < t.radius + 18) {
+                    createParticles(t.x, t.y, '#ff0055', 20);
+                    tornadoes.splice(i, 1);
+                    lives--;
+                    audioEngine.playExplosion();
+                    if (lives <= 0) gameOver();
+                    continue;
+                }
+
+                if (t.y > canvas.height + 40) tornadoes.splice(i, 1);
+            }
+
+            // Time Crystals
+            for (let i = crystals.length - 1; i >= 0; i--) {
+                const c = crystals[i];
+                c.y += c.speed;
+
+                ctx.save();
+                ctx.translate(c.x, c.y);
+                ctx.fillStyle = '#00f3ff';
+                ctx.shadowColor = '#00f3ff';
+                ctx.shadowBlur = 8;
+                
+                ctx.beginPath();
+                ctx.moveTo(0, -c.size / 2);
+                ctx.lineTo(c.size / 2, 0);
+                ctx.lineTo(0, c.size / 2);
+                ctx.lineTo(-c.size / 2, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+
+                const dist = Math.hypot(c.x - ship.x, c.y - ship.y);
+                if (dist < c.size + 20) {
+                    createParticles(c.x, c.y, '#00f3ff', 10);
+                    crystals.splice(i, 1);
+                    score += 50;
+                    audioEngine.playPickup();
+                    continue;
+                }
+
+                if (c.y > canvas.height + 30) crystals.splice(i, 1);
+            }
+
+            // Asteroids
+            for (let i = asteroids.length - 1; i >= 0; i--) {
+                const a = asteroids[i];
+                a.y += a.speed;
+
+                ctx.save();
+                ctx.translate(a.x, a.y);
+                ctx.fillStyle = '#64748b';
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                ctx.arc(0, 0, a.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+
+                const dist = Math.hypot(a.x - ship.x, a.y - ship.y);
+                if (dist < a.size + 18) {
+                    createParticles(a.x, a.y, '#ef4444', 15);
+                    asteroids.splice(i, 1);
+                    lives--;
+                    audioEngine.playExplosion();
+                    if (lives <= 0) gameOver();
+                    continue;
+                }
+
+                if (a.y > canvas.height + 30) asteroids.splice(i, 1);
+            }
+
+            // Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= 0.04;
+
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            animFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            audioEngine.init();
+            audioEngine.playPortal();
+
+            document.getElementById('portalForm').classList.add('hidden');
+            document.getElementById('transmittingBox').classList.remove('hidden');
+
+            setTimeout(() => {
+                document.getElementById('transmittingBox').classList.add('hidden');
+                document.getElementById('rickReplyModal').classList.remove('hidden');
+                audioEngine.playPickup();
+            }, 1200);
+        }
+
+        function resetContactForm() {
+            document.getElementById('portalForm').reset();
+            document.getElementById('rickReplyModal').classList.add('hidden');
+            document.getElementById('portalForm').classList.remove('hidden');
+        }
+
+        resizeCanvas();
+    </script>
+</body>
+</html>
